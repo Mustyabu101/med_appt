@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './App.css'
+import Notification from './Notification'
 
 export default function App() {
   const [notice, setNotice] = useState('')
@@ -147,12 +148,10 @@ export default function App() {
           </form>
         </section>
 
-        {notice && (
-          <div className="notice" role="status">
-            <span>{notice}</span>
-            <button onClick={() => setNotice('')} aria-label="Dismiss message">×</button>
-          </div>
-        )}
+        <Notification
+          message={notice}
+          onDismiss={() => setNotice('')}
+        />
       </main>
 
       
