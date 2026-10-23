@@ -7,7 +7,24 @@ export default function GiveReviews() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    setSubmitted(true);
+    if (submitted || !review.trim()) return;
+
+    const newReview = {
+      rating: Number(rating),
+      review: review.trim(),
+      submittedAt: new Date().toISOString()
+    };
+
+    try {
+      const saved = JSON.parse(localStorage.getItem('stayhealthy_reviews') || '[]');
+      localStorage.setItem(
+        'stayhealthy_reviews',
+        JSON.stringify([...saved, newReview])
+      );
+      setSubmitted(true);
+    } catch (error) {
+      console.error('Unable to save review:', error);
+    }
   }
 
   return (
@@ -15,7 +32,7 @@ export default function GiveReviews() {
       <h2>Give Your Review</h2>
 
       {submitted && (
-        <p role="status">Thank you! Your review has been submitted.</p>
+        <p role="status">Thank you! Your review has been saved.</p>
       )}
 
       <form onSubmit={handleSubmit}>

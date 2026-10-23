@@ -4,6 +4,7 @@ export default function ProfileCard() {
   const [name, setName] = useState('Alex Johnson');
   const [role, setRole] = useState('Healthcare Professional');
   const [email, setEmail] = useState('alex@example.com');
+  const [phone, setPhone] = useState('');
   const [editing, setEditing] = useState(false);
 
   function handleSubmit(event) {
@@ -39,6 +40,7 @@ export default function ProfileCard() {
             <h2>{name}</h2>
             <p>{role}</p>
             <p>{email}</p>
+            <p>Phone: {phone || 'Not provided'}</p>
             <button type="button" onClick={() => setEditing(true)}>
               Edit Profile
             </button>
@@ -74,6 +76,15 @@ export default function ProfileCard() {
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+
+          <label htmlFor="profile-phone">Phone Number</label>
+          <input
+            id="profile-phone"
+            type="tel"
+            value={phone}
+            onChange={(event) => setPhone(event.target.value)}
             required
           />
 

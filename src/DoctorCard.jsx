@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export default function DoctorCard({
   doctor = {
@@ -11,7 +11,7 @@ export default function DoctorCard({
 }) {
   const [cancelled, setCancelled] = useState(false);
 
-  const handleCancelAppointment = () => {
+  function handleCancelAppointment() {
     if (cancelled) return;
 
     const confirmed = window.confirm(
@@ -20,12 +20,34 @@ export default function DoctorCard({
 
     if (!confirmed) return;
 
+    try {
+      const stored = JSON.parse(localStorage.getItem('appointments') || '[]');
+
+      if (Array.isArray(stored)) {
+        const remaining = stored.filter((appointment) => {
+          if (doctor.id != null && appointment.id != null) {
+            return String(appointment.id) !== String(doctor.id);
+          }
+
+          return !(
+            appointment.name === doctor.name &&
+            appointment.appointmentDate === doctor.appointmentDate &&
+            appointment.appointmentTime === doctor.appointmentTime
+          );
+        });
+
+        localStorage.setItem('appointments', JSON.stringify(remaining));
+      }
+    } catch (error) {
+      console.error('Unable to update stored appointments:', error);
+    }
+
     setCancelled(true);
 
     if (typeof onCancel === 'function') {
       onCancel(doctor);
     }
-  };
+  }
 
   return (
     <article className="doctor-card">
