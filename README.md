@@ -1,47 +1,52 @@
-# StayHealthy — Healthcare and Wellness Platform
+# Medical Appointment Booking — StayHealthy
 
 ## Project Overview
-StayHealthy is a responsive healthcare and wellness web application built with React and Vite. It provides a modern interface for healthcare-related features.
+StayHealthy is a healthcare web application built with React and Vite, designed around medical appointment booking and patient-related activities.
 
 ## Features
 - Responsive navigation bar
-- Appointments section
-- User login form
-- User sign-up form
-- Healthcare and wellness information
-- Responsive design for different screen sizes
+- User registration and login interfaces
+- Doctor search and appointment-related components
+- Appointment booking form
+- Doctor information cards
+- Patient profile management
+- Patient reviews and ratings
+- Responsive healthcare-focused interface
 
-## Technologies
+## Technologies Used
 - React
 - JavaScript
 - Vite
+- HTML
 - CSS
 
 ## Prerequisites
-Install Node.js and npm.
+- Node.js
+- npm
 
-## Setup Instructions
-1. Clone this repository from GitHub.
-2. Open the project directory in your terminal.
-3. Install the dependencies:
-
+## Installation and Setup
+1. Clone the repository:
+   `git clone https://github.com/Mustyabu101/stayhealthy.git`
+2. Enter the project directory:
+   `cd stayhealthy`
+3. Install dependencies:
    `npm install`
-
 4. Start the development server:
-
    `npm run dev`
-
 5. Open the local URL displayed in the terminal.
 
 ## Production Build
-Run the following command to create a production build:
+Run the following command:
 
 `npm run build`
 
-The production files are generated in the `dist` directory.
+The generated production files are saved in the `dist` directory.
+
+## Project Purpose
+This project demonstrates React components, responsive design, forms, and healthcare appointment-related interfaces as part of a front-end development capstone.
 
 ## Note
-The login and sign-up forms are demonstration interfaces. Real authentication requires a backend service.
+Authentication and data storage depend on the available backend configuration. Features requiring a live backend should be tested with the appropriate service.
 
 ## License
 Created for educational purposes.
