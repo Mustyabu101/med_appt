@@ -7,6 +7,13 @@ export default function App() {
   const [notice, setNotice] = useState('')
   const [registering, setRegistering] = useState(false)
   const [loggingIn, setLoggingIn] = useState(false)
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('user') || 'null')
+    } catch {
+      return null
+    }
+  })
 
   const features = [
     {
@@ -116,8 +123,15 @@ export default function App() {
         throw new Error(data.error || 'Login failed.')
       }
 
+      if (!data.user) {
+        throw new Error('Login response did not include user information.')
+      }
+
+      localStorage.setItem('user', JSON.stringify(data.user))
+      setUser(data.user)
+
       setNotice(
-        `Welcome back, ${data.user?.name || 'user'}! Login successful.`
+        `Welcome back, ${data.user.name || 'user'}! Login successful.`
       )
 
       form.reset()
@@ -129,6 +143,14 @@ export default function App() {
     } finally {
       setLoggingIn(false)
     }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('user')
+    localStorage.removeItem('token')
+    sessionStorage.clear()
+    setUser(null)
+    setNotice('You have been logged out successfully.')
   }
 
   return (
@@ -152,16 +174,29 @@ export default function App() {
           <a href="#login">Login</a>
         </nav>
 
-        <button
-          className="header-button"
-          onClick={() =>
-            document.getElementById('signup')?.scrollIntoView({
-              behavior: 'smooth',
-            })
-          }
-        >
-          Sign Up <span>↗</span>
-        </button>
+        {!user && (
+          <button
+            className="header-button"
+            type="button"
+            onClick={() =>
+              document.getElementById('signup')?.scrollIntoView({
+                behavior: 'smooth',
+              })
+            }
+          >
+            Sign Up <span>↗</span>
+          </button>
+        )}
+
+        {user && (
+          <button
+            className="header-button logout-button"
+            type="button"
+            onClick={handleLogout}
+          >
+            Log Out
+          </button>
+        )}
       </header>
 
       <main id="home">
