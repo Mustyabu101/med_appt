@@ -48,6 +48,7 @@ export default function FindDoctorSearch({
 
   const handleSelectDoctor = (doctor) => {
     setSelectedDoctor(doctor);
+    setSearchTerm(doctor.specialty);
 
     if (typeof onSelectDoctor === 'function') {
       onSelectDoctor(doctor);

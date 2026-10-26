@@ -1,5 +1,6 @@
 
 import { useState } from 'react'
+import FindDoctorSearch from './FindDoctorSearch'
 import './App.css'
 import Notification from './Notification'
 
@@ -325,6 +326,20 @@ export default function App() {
             ))}
           </div>
         </section>
+
+        <FindDoctorSearch
+          onSelectDoctor={(doctor) => {
+            const specialty = doctor.specialty
+            const params = new URLSearchParams(window.location.search)
+            params.set('specialty', specialty)
+            window.history.pushState(
+              {},
+              '',
+              `${window.location.pathname}?${params.toString()}`
+            )
+            setNotice(`Showing doctors for ${specialty}.`)
+          }}
+        />
 
         <section className="signup-section" id="signup">
           <div className="signup-intro">
