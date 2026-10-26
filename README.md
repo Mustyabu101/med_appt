@@ -26,9 +26,9 @@ StayHealthy is a healthcare web application built with React and Vite, designed 
 
 ## Installation and Setup
 1. Clone the repository:
-   `git clone https://github.com/Mustyabu101/stayhealthy.git`
+   `git clone https://github.com/Mustyabu101/med_appt.git`
 2. Enter the project directory:
-   `cd stayhealthy`
+   `cd med_appt`
 3. Install dependencies:
    `npm install`
 4. Start the development server:
