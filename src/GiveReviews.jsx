@@ -12,7 +12,7 @@ export default function GiveReviews({
 
   const existingReview =
     report?.serialNumber != null
-      ? reviewData[report.serialNumber]
+     ? reviewData?.[report.serialNumber]
       : null;
   const serialNumber = report?.serialNumber;
   const reviewAlreadyGiven = Boolean(existingReview) || submitted;
