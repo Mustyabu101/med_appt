@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
 
 export default function GiveReviews({
   report = {},
@@ -10,11 +12,9 @@ export default function GiveReviews({
   const [review, setReview] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const existingReview =
-    report?.serialNumber != null
-     ? reviewData?.[report.serialNumber]
-      : null;
   const serialNumber = report?.serialNumber;
+  const existingReview =
+    serialNumber != null ? reviewData?.[serialNumber] : null;
   const reviewAlreadyGiven = Boolean(existingReview) || submitted;
 
   function handleSubmit(event) {
@@ -63,48 +63,75 @@ export default function GiveReviews({
           Review Given
         </button>
       ) : (
-        <form onSubmit={handleSubmit}>
-          <fieldset>
-            <legend>Share your experience</legend>
+        <Popup
+          trigger={<button type="button">Open Review Form</button>}
+          modal
+          nested
+          closeOnDocumentClick
+        >
+          {(close) => (
+            <div className="review-popup" style={{ padding: '1rem' }}>
+              <button
+                type="button"
+                onClick={close}
+                aria-label="Close review form"
+                style={{ float: 'right' }}
+              >
+                ×
+              </button>
 
-            <label htmlFor="review-name">Name</label>
-            <input
-              id="review-name"
-              name="name"
-              type="text"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              autoComplete="name"
-              required
-            />
+              <h3>Share Your Experience</h3>
 
-            <label htmlFor="review-rating">Rating</label>
-            <select
-              id="review-rating"
-              name="rating"
-              value={rating}
-              onChange={(event) => setRating(event.target.value)}
-              required
-            >
-              <option value="5">5 - Excellent</option>
-              <option value="4">4 - Very good</option>
-              <option value="3">3 - Good</option>
-              <option value="2">2 - Fair</option>
-              <option value="1">1 - Poor</option>
-            </select>
+              <form
+                onSubmit={(event) => {
+                  handleSubmit(event);
+                  if (event.currentTarget.checkValidity()) close();
+                }}
+              >
+                <fieldset>
+                  <legend>Review details</legend>
 
-            <label htmlFor="review-text">Your Review</label>
-            <textarea
-              id="review-text"
-              name="review"
-              value={review}
-              onChange={(event) => setReview(event.target.value)}
-              required
-            />
+                  <label htmlFor="review-name">Name</label>
+                  <input
+                    id="review-name"
+                    name="name"
+                    type="text"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    autoComplete="name"
+                    required
+                  />
 
-            <button type="submit">Submit Review</button>
-          </fieldset>
-        </form>
+                  <label htmlFor="review-rating">Rating</label>
+                  <select
+                    id="review-rating"
+                    name="rating"
+                    value={rating}
+                    onChange={(event) => setRating(event.target.value)}
+                    required
+                  >
+                    <option value="5">5 - Excellent</option>
+                    <option value="4">4 - Very good</option>
+                    <option value="3">3 - Good</option>
+                    <option value="2">2 - Fair</option>
+                    <option value="1">1 - Poor</option>
+                  </select>
+
+                  <label htmlFor="review-text">Your Review</label>
+                  <textarea
+                    id="review-text"
+                    name="review"
+                    value={review}
+                    onChange={(event) => setReview(event.target.value)}
+                    required
+                  />
+
+                  <button type="submit">Submit Review</button>
+                </fieldset>
+              </form>
+            </div>
+          )}
+        </Popup>
       )}
     </section>
   );
