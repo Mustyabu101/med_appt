@@ -1,54 +1,33 @@
 import React, { useMemo, useState } from 'react';
 
 const sampleDoctors = [
-  {
-    id: 1,
-    name: 'Dr. Sarah Johnson',
-    specialty: 'General Physician',
-    availability: 'Available'
-  },
-  {
-    id: 2,
-    name: 'Dr. Michael Brown',
-    specialty: 'Cardiologist',
-    availability: 'Available'
-  },
-  {
-    id: 3,
-    name: 'Dr. Emily Davis',
-    specialty: 'Dermatologist',
-    availability: 'Available'
-  },
-  {
-    id: 4,
-    name: 'Dr. James Wilson',
-    specialty: 'Pediatrician',
-    availability: 'Available'
-  }
+  { id: 1, name: 'Dr. Sarah Johnson', specialty: 'General Physician', availability: 'Available' },
+  { id: 2, name: 'Dr. Michael Brown', specialty: 'Cardiologist', availability: 'Available' },
+  { id: 3, name: 'Dr. Emily Davis', specialty: 'Dermatologist', availability: 'Available' },
+  { id: 4, name: 'Dr. James Wilson', specialty: 'Pediatrician', availability: 'Available' }
 ];
 
-export default function FindDoctorSearch({
-  doctors = sampleDoctors,
-  onSelectDoctor
-}) {
-  const [searchTerm, setSearchTerm] = useState('');
+export default function FindDoctorSearch({ doctors = sampleDoctors, onSelectDoctor }) {
+  const [searchTerm, setSearchTerm] = useState(
+    new URLSearchParams(window.location.search).get('specialty') || ''
+  );
   const [selectedDoctor, setSelectedDoctor] = useState(null);
 
   const filteredDoctors = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-
     if (!query) return doctors;
 
     return doctors.filter((doctor) =>
-      `${doctor.name} ${doctor.specialty}`
-        .toLowerCase()
-        .includes(query)
+      `${doctor.name} ${doctor.specialty}`.toLowerCase().includes(query)
     );
   }, [doctors, searchTerm]);
 
   const handleSelectDoctor = (doctor) => {
     setSelectedDoctor(doctor);
     setSearchTerm(doctor.specialty);
+
+    const resultsUrl = `/?specialty=${encodeURIComponent(doctor.specialty)}`;
+    window.history.pushState({ specialty: doctor.specialty }, '', resultsUrl);
 
     if (typeof onSelectDoctor === 'function') {
       onSelectDoctor(doctor);
@@ -76,12 +55,8 @@ export default function FindDoctorSearch({
               <h3>{doctor.name}</h3>
               <p>Specialty: {doctor.specialty}</p>
               <p>Status: {doctor.availability}</p>
-
-              <button
-                type="button"
-                onClick={() => handleSelectDoctor(doctor)}
-              >
-                Select Doctor
+              <button type="button" onClick={() => handleSelectDoctor(doctor)}>
+                View {doctor.specialty} Results
               </button>
             </article>
           ))
