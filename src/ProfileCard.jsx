@@ -1,14 +1,47 @@
 import { useState } from 'react';
 
+const defaultProfile = {
+  name: 'Alex Johnson',
+  role: 'Healthcare Professional',
+  email: 'alex@example.com',
+  phone: ''
+};
+
+function loadProfile() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('stayhealthy_profile') || 'null');
+    return saved && typeof saved === 'object'
+      ? { ...defaultProfile, ...saved }
+      : defaultProfile;
+  } catch {
+    return defaultProfile;
+  }
+}
+
 export default function ProfileCard() {
-  const [name, setName] = useState('Alex Johnson');
-  const [role, setRole] = useState('Healthcare Professional');
-  const [email, setEmail] = useState('alex@example.com');
-  const [phone, setPhone] = useState('');
+  const [profile, setProfile] = useState(loadProfile);
+  const [form, setForm] = useState(profile);
   const [editing, setEditing] = useState(false);
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+    setForm((current) => ({ ...current, [name]: value }));
+  }
 
   function handleSubmit(event) {
     event.preventDefault();
+
+    try {
+      localStorage.setItem('stayhealthy_profile', JSON.stringify(form));
+      setProfile(form);
+      setEditing(false);
+    } catch (error) {
+      console.error('Unable to save profile:', error);
+    }
+  }
+
+  function handleCancel() {
+    setForm(profile);
     setEditing(false);
   }
 
@@ -32,16 +65,22 @@ export default function ProfileCard() {
             marginBottom: '16px'
           }}
         >
-          {name.charAt(0).toUpperCase()}
+          {profile.name.charAt(0).toUpperCase()}
         </div>
 
         {!editing && (
           <>
-            <h2>{name}</h2>
-            <p>{role}</p>
-            <p>{email}</p>
-            <p>Phone: {phone || 'Not provided'}</p>
-            <button type="button" onClick={() => setEditing(true)}>
+            <h2>{profile.name}</h2>
+            <p>{profile.role}</p>
+            <p>{profile.email}</p>
+            <p>Phone: {profile.phone || 'Not provided'}</p>
+            <button
+              type="button"
+              onClick={() => {
+                setForm(profile);
+                setEditing(true);
+              }}
+            >
               Edit Profile
             </button>
           </>
@@ -55,43 +94,45 @@ export default function ProfileCard() {
           <label htmlFor="profile-name">Full Name</label>
           <input
             id="profile-name"
+            name="name"
             type="text"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
+            value={form.name}
+            onChange={handleChange}
             required
           />
 
           <label htmlFor="profile-role">Role</label>
           <input
             id="profile-role"
+            name="role"
             type="text"
-            value={role}
-            onChange={(event) => setRole(event.target.value)}
+            value={form.role}
+            onChange={handleChange}
             required
           />
 
           <label htmlFor="profile-email">Email Address</label>
           <input
             id="profile-email"
+            name="email"
             type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            value={form.email}
+            onChange={handleChange}
             required
           />
 
           <label htmlFor="profile-phone">Phone Number</label>
           <input
             id="profile-phone"
+            name="phone"
             type="tel"
-            value={phone}
-            onChange={(event) => setPhone(event.target.value)}
+            value={form.phone}
+            onChange={handleChange}
             required
           />
 
           <button type="submit">Save Changes</button>
-          <button type="button" onClick={() => setEditing(false)}>
-            Cancel
-          </button>
+          <button type="button" onClick={handleCancel}>Cancel</button>
         </form>
       )}
     </section>
