@@ -1,4 +1,3 @@
-import React from 'react';
 
 export default function Notification({ message, onDismiss }) {
   if (!message) return null;

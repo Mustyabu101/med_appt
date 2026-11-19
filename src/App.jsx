@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import FindDoctorSearch from './FindDoctorSearch'
 import './App.css'
 import Notification from './Notification'
@@ -8,13 +8,52 @@ export default function App() {
   const [notice, setNotice] = useState('')
   const [registering, setRegistering] = useState(false)
   const [loggingIn, setLoggingIn] = useState(false)
-  const [user, setUser] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('user') || 'null')
-    } catch {
-      return null
+  const [user, setUser] = useState(null)
+  const [checkingSession, setCheckingSession] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function verifySession() {
+      try {
+        const response = await fetch('/api/auth/session', {
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
+            Accept: 'application/json',
+          },
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Session verification failed.')
+        }
+
+        if (!cancelled && data.authenticated && data.user) {
+          setUser(data.user)
+        }
+      } catch (error) {
+        console.error('Session verification failed:', error)
+
+        if (!cancelled) {
+          setNotice(
+            'Unable to verify your session. Please try logging in again.'
+          )
+        }
+      } finally {
+        if (!cancelled) {
+          setCheckingSession(false)
+        }
+      }
     }
-  })
+
+    verifySession()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const features = [
     {
@@ -59,8 +98,9 @@ export default function App() {
     setNotice('')
 
     try {
-      const response = await fetch('/api/register', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -80,10 +120,11 @@ export default function App() {
       }
 
       setNotice(
-        'Registration successful! You can now log in with your email and password.'
+        'Registration successful! Please log in with your email and password.'
       )
 
       form.reset()
+
       document.getElementById('login')?.scrollIntoView({
         behavior: 'smooth',
       })
@@ -107,8 +148,9 @@ export default function App() {
     setNotice('')
 
     try {
-      const response = await fetch('/api/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -128,7 +170,6 @@ export default function App() {
         throw new Error('Login response did not include user information.')
       }
 
-      localStorage.setItem('user', JSON.stringify(data.user))
       setUser(data.user)
 
       setNotice(
@@ -146,12 +187,27 @@ export default function App() {
     }
   }
 
-  function handleLogout() {
-    localStorage.removeItem('user')
-    localStorage.removeItem('token')
-    sessionStorage.clear()
-    setUser(null)
-    setNotice('You have been logged out successfully.')
+  async function handleLogout() {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          Accept: 'application/json',
+        },
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Logout failed.')
+      }
+
+      setUser(null)
+      setNotice('You have been logged out successfully.')
+    } catch (error) {
+      setNotice(error.message || 'Unable to log out. Please try again.')
+    }
   }
 
   return (
@@ -174,6 +230,12 @@ export default function App() {
           </a>
           <a href="#login">Login</a>
         </nav>
+
+        {checkingSession && (
+          <span role="status" aria-live="polite">
+            Checking session...
+          </span>
+        )}
 
         {!user && (
           <button
@@ -372,19 +434,16 @@ export default function App() {
               <p>Enter your details to get started.</p>
             </div>
 
-            <label htmlFor="signup-role">Role</label>
-            <select
-              id="signup-role"
+            <input
+              type="hidden"
               name="role"
-              defaultValue="Patient"
-              required
-            >
-              <option value="Patient">Patient</option>
-              <option value="Doctor">Doctor</option>
-              <option value="Healthcare Professional">
-                Healthcare Professional
-              </option>
-            </select>
+              value="Patient"
+            />
+
+            <p className="form-footnote">
+              New accounts are registered as Patient accounts.
+              Professional accounts require administrator approval.
+            </p>
 
             <label htmlFor="signup-name">Full Name</label>
             <input

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 const sampleDoctors = [
   { id: 1, name: 'Dr. Sarah Johnson', specialty: 'General Physician', availability: 'Available' },
