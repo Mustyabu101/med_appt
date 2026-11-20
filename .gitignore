@@ -6,3 +6,6 @@ dist/
 .DS_Store
 *.backup
 public/preview-test.html
+
+# Generated assessment build output
+/server/build/
