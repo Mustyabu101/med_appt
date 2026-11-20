@@ -237,7 +237,7 @@ export default function App() {
           <a className="active-link" href="#services">
             Appointments
           </a>
-          <a href="#login">Login</a>
+          {!user && <a href="#login">Login</a>}
         </nav>
 
         {checkingSession && (
@@ -272,6 +272,104 @@ export default function App() {
       </header>
 
       <main id="home">
+        {checkingSession ? (
+          <section
+            style={{ padding: '64px 24px', textAlign: 'center' }}
+            role="status"
+          >
+            Checking your session...
+          </section>
+        ) : user ? (
+          <section
+            className="patient-dashboard"
+            style={{
+              maxWidth: '1100px',
+              margin: '0 auto',
+              padding: '48px 24px 72px',
+            }}
+          >
+            <div className="eyebrow">
+              YOUR PERSONAL HEALTH SPACE
+            </div>
+
+            <h1>Welcome, {user.name || 'Patient'}!</h1>
+
+            <p>
+              You are securely signed in to your StayHealthy account.
+            </p>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns:
+                  'repeat(auto-fit, minmax(240px, 1fr))',
+                gap: '20px',
+                margin: '32px 0',
+              }}
+            >
+              <article className="feature-card">
+                <div className="feature-icon">👤</div>
+                <h3>My Profile</h3>
+                <p>Name: {user.name || 'Patient'}</p>
+                <p>Email: {user.email || 'Not available'}</p>
+                <p>Account: Patient</p>
+              </article>
+
+              <article className="feature-card">
+                <div className="feature-icon">📅</div>
+                <h3>My Appointments</h3>
+                <p>
+                  Appointment history is not yet connected to
+                  your account.
+                </p>
+              </article>
+
+              <article className="feature-card">
+                <div className="feature-icon">🩺</div>
+                <h3>Find a Doctor</h3>
+                <p>
+                  Search the available sample doctor directory
+                  below.
+                </p>
+                <button
+                  className="feature-link"
+                  type="button"
+                  onClick={() =>
+                    document
+                      .getElementById('dashboard-doctors')
+                      ?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start',
+                      })
+                  }
+                >
+                  Search Doctors →
+                </button>
+              </article>
+            </div>
+
+            <div id="dashboard-doctors">
+              <FindDoctorSearch
+                onSelectDoctor={(doctor) => {
+                  setNotice(
+                    `Selected ${doctor.name}. Appointment booking is not yet connected.`
+                  )
+                }}
+              />
+            </div>
+
+            <div style={{ marginTop: '32px' }}>
+              <button
+                className="header-button logout-button"
+                type="button"
+                onClick={handleLogout}
+              >
+                Log Out
+              </button>
+            </div>
+          </section>
+        ) : (
+          <>
         <section className="hero">
           <div className="hero-copy">
             <div className="eyebrow">
@@ -543,13 +641,17 @@ export default function App() {
           </form>
         </section>
 
+          </>
+        )}
+
         <Notification
           message={notice}
           onDismiss={() => setNotice('')}
         />
       </main>
 
-      <section className="login-section" id="login">
+      {!user && !checkingSession && (
+        <section className="login-section" id="login">
         <div className="login-card">
           <div className="form-symbol">✚</div>
           <div className="eyebrow login-eyebrow">WELCOME BACK</div>
@@ -612,7 +714,8 @@ export default function App() {
             </p>
           </form>
         </div>
-      </section>
+        </section>
+      )}
 
       <footer className="footer">
         <a className="brand footer-brand" href="#home">
