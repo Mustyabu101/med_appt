@@ -177,6 +177,15 @@ export default function App() {
       )
 
       form.reset()
+
+      window.history.replaceState(null, '', '#home')
+
+      requestAnimationFrame(() => {
+        document.getElementById('home')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
+      })
     } catch (error) {
       setNotice(
         error.message ||
