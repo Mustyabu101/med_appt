@@ -509,15 +509,7 @@ export default function App() {
 
         <FindDoctorSearch
           onSelectDoctor={(doctor) => {
-            const specialty = doctor.specialty
-            const params = new URLSearchParams(window.location.search)
-            params.set('specialty', specialty)
-            window.history.pushState(
-              {},
-              '',
-              `${window.location.pathname}?${params.toString()}`
-            )
-            setNotice(`Showing doctors for ${specialty}.`)
+            setNotice(`Showing results for ${doctor.specialty}.`)
           }}
         />
 
