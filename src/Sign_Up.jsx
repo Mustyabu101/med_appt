@@ -99,17 +99,7 @@ export default function Sign_Up() {
           required
         />
 
-        <label htmlFor="signup-role">Account Type</label>
-        <select
-          id="signup-role"
-          name="role"
-          value={form.role}
-          onChange={handleChange}
-          required
-        >
-          <option value="Patient">Patient</option>
-          <option value="Doctor">Doctor</option>
-        </select>
+        <p>Account Type: Patient</p>
 
         <button type="submit" disabled={loading}>
           {loading ? 'Registering...' : 'Sign Up'}
