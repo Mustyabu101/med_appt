@@ -1,43 +1,85 @@
+import { useState } from 'react';
 
 export default function Navbar({ user, onLogout }) {
-  const handleLogout = () => {
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [error, setError] = useState('');
+
+  async function handleLogout() {
     const confirmed = window.confirm(
       'Are you sure you want to log out?'
     );
 
-    if (!confirmed) return;
+    if (!confirmed || loggingOut) return;
 
-    // Clear saved authentication information.
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    sessionStorage.clear();
+    setLoggingOut(true);
+    setError('');
 
-    // Notify the parent application, if a handler was provided.
-    if (typeof onLogout === 'function') {
-      onLogout();
-    } else {
-      window.location.href = '/login';
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          Accept: 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Unable to log out. Please try again.');
+      }
+
+      // Remove any authentication data left by older versions.
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('user');
+      sessionStorage.removeItem('token');
+
+      // Notify the application so React can clear its user state.
+      if (typeof onLogout === 'function') {
+        await onLogout();
+      } else {
+        window.location.assign('/');
+      }
+    } catch (err) {
+      setError(
+        err.message || 'Logout failed. Please try again.'
+      );
+    } finally {
+      setLoggingOut(false);
     }
-  };
+  }
 
   return (
-    <nav className="navbar">
+    <nav className="navbar" aria-label="Main navigation">
       <a href="/" className="navbar-brand">
         StayHealthy
       </a>
 
       <div className="navbar-links">
         <a href="/">Home</a>
-        <a href="/appointments">Appointments</a>
-        <a href="/signup">Sign Up</a>
-        <a href="/login">Login</a>
+
+        <a href="/#services">
+          Appointments
+        </a>
+
+        {!user && (
+          <>
+            <a href="/#signup">Sign Up</a>
+            <a href="/#login">Login</a>
+          </>
+        )}
 
         {user && (
-          <button type="button" onClick={handleLogout}>
-            Logout
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loggingOut}
+          >
+            {loggingOut ? 'Logging out...' : 'Logout'}
           </button>
         )}
       </div>
+
+      {error && <p role="alert">{error}</p>}
     </nav>
   );
 }
