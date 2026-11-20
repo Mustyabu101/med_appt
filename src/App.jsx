@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import FindDoctorSearch from './FindDoctorSearch'
 import './App.css'
 import Notification from './Notification'
+import PatientAppointments from './PatientAppointments'
 
 export default function App() {
   const [notice, setNotice] = useState('')
@@ -347,6 +348,8 @@ export default function App() {
                 </button>
               </article>
             </div>
+
+            <PatientAppointments />
 
             <div id="dashboard-doctors">
               <FindDoctorSearch
