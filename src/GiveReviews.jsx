@@ -11,16 +11,29 @@ export default function GiveReviews({
   const [rating, setRating] = useState('5');
   const [review, setReview] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   const serialNumber = report?.serialNumber;
   const existingReview =
     serialNumber != null ? reviewData?.[serialNumber] : null;
+
   const reviewAlreadyGiven = Boolean(existingReview) || submitted;
 
-  function handleSubmit(event) {
+  function handleSubmit(event, close) {
     event.preventDefault();
+    setError('');
 
-    if (reviewAlreadyGiven || !name.trim() || !review.trim()) return;
+    if (reviewAlreadyGiven) return;
+
+    if (!name.trim() || !review.trim()) {
+      setError('Please complete the review form.');
+      return;
+    }
+
+    if (typeof onSubmitReview !== 'function') {
+      setError('Review submission is not configured.');
+      return;
+    }
 
     const newReview = {
       name: name.trim(),
@@ -31,32 +44,18 @@ export default function GiveReviews({
     };
 
     try {
-      const saved = JSON.parse(
-        localStorage.getItem('stayhealthy_reviews') || '[]'
-      );
-
-      if (!Array.isArray(saved)) {
-        throw new Error('Saved reviews are not in the expected format.');
-      }
-
-      localStorage.setItem(
-        'stayhealthy_reviews',
-        JSON.stringify([...saved, newReview])
-      );
-
-      if (typeof onSubmitReview === 'function') {
-        onSubmitReview(newReview);
-      }
-
+      onSubmitReview(newReview);
       setSubmitted(true);
-    } catch (error) {
-      console.error('Unable to save review:', error);
+      close();
+    } catch (submissionError) {
+      console.error('Unable to save review:', submissionError);
+      setError('Unable to save your review. Please try again.');
     }
   }
 
   return (
     <section className="give-reviews">
-      <h2>Give Your Review</h2>
+      <h3>Give Your Review</h3>
 
       {reviewAlreadyGiven ? (
         <button type="button" disabled>
@@ -64,13 +63,20 @@ export default function GiveReviews({
         </button>
       ) : (
         <Popup
-          trigger={<button type="button">Open Review Form</button>}
+          trigger={
+            <button type="button">
+              Open Review Form
+            </button>
+          }
           modal
           nested
           closeOnDocumentClick
         >
           {(close) => (
-            <div className="review-popup" style={{ padding: '1rem' }}>
+            <div
+              className="review-popup"
+              style={{ padding: '1rem' }}
+            >
               <button
                 type="button"
                 onClick={close}
@@ -83,10 +89,7 @@ export default function GiveReviews({
               <h3>Share Your Experience</h3>
 
               <form
-                onSubmit={(event) => {
-                  handleSubmit(event);
-                  if (event.currentTarget.checkValidity()) close();
-                }}
+                onSubmit={(event) => handleSubmit(event, close)}
               >
                 <fieldset>
                   <legend>Review details</legend>
@@ -126,7 +129,11 @@ export default function GiveReviews({
                     required
                   />
 
-                  <button type="submit">Submit Review</button>
+                  {error && <p role="alert">{error}</p>}
+
+                  <button type="submit">
+                    Submit Review
+                  </button>
                 </fieldset>
               </form>
             </div>

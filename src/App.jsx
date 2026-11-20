@@ -4,6 +4,7 @@ import FindDoctorSearch from './FindDoctorSearch'
 import './App.css'
 import Notification from './Notification'
 import PatientAppointments from './PatientAppointments'
+import PatientReviews from './PatientReviews'
 
 export default function App() {
   const [notice, setNotice] = useState('')
@@ -350,6 +351,8 @@ export default function App() {
             </div>
 
             <PatientAppointments />
+
+            <PatientReviews key={user.id} user={user} />
 
             <div id="dashboard-doctors">
               <FindDoctorSearch
