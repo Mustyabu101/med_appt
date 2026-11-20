@@ -273,6 +273,11 @@ export default function App() {
         )}
       </header>
 
+        <Notification
+          message={notice}
+          onDismiss={() => setNotice('')}
+        />
+
       <main id="home">
         {checkingSession ? (
           <section
@@ -650,10 +655,6 @@ export default function App() {
           </>
         )}
 
-        <Notification
-          message={notice}
-          onDismiss={() => setNotice('')}
-        />
       </main>
 
       {!user && !checkingSession && (
