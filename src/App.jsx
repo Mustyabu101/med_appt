@@ -1,20 +1,61 @@
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import FindDoctorSearch from './FindDoctorSearch'
 import './App.css'
 import Notification from './Notification'
+import PatientAppointments from './PatientAppointments'
+import PatientReviews from './PatientReviews'
 
 export default function App() {
   const [notice, setNotice] = useState('')
   const [registering, setRegistering] = useState(false)
   const [loggingIn, setLoggingIn] = useState(false)
-  const [user, setUser] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('user') || 'null')
-    } catch {
-      return null
+  const [user, setUser] = useState(null)
+  const [checkingSession, setCheckingSession] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function verifySession() {
+      try {
+        const response = await fetch('/api/auth/session', {
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
+            Accept: 'application/json',
+          },
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Session verification failed.')
+        }
+
+        if (!cancelled && data.authenticated && data.user) {
+          setUser(data.user)
+        }
+      } catch (error) {
+        console.error('Session verification failed:', error)
+
+        if (!cancelled) {
+          setNotice(
+            'Unable to verify your session. Please try logging in again.'
+          )
+        }
+      } finally {
+        if (!cancelled) {
+          setCheckingSession(false)
+        }
+      }
     }
-  })
+
+    verifySession()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const features = [
     {
@@ -59,8 +100,9 @@ export default function App() {
     setNotice('')
 
     try {
-      const response = await fetch('/api/register', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -80,10 +122,11 @@ export default function App() {
       }
 
       setNotice(
-        'Registration successful! You can now log in with your email and password.'
+        'Registration successful! Please log in with your email and password.'
       )
 
       form.reset()
+
       document.getElementById('login')?.scrollIntoView({
         behavior: 'smooth',
       })
@@ -107,8 +150,9 @@ export default function App() {
     setNotice('')
 
     try {
-      const response = await fetch('/api/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -128,7 +172,6 @@ export default function App() {
         throw new Error('Login response did not include user information.')
       }
 
-      localStorage.setItem('user', JSON.stringify(data.user))
       setUser(data.user)
 
       setNotice(
@@ -136,6 +179,15 @@ export default function App() {
       )
 
       form.reset()
+
+      window.history.replaceState(null, '', '#home')
+
+      requestAnimationFrame(() => {
+        document.getElementById('home')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
+      })
     } catch (error) {
       setNotice(
         error.message ||
@@ -146,12 +198,27 @@ export default function App() {
     }
   }
 
-  function handleLogout() {
-    localStorage.removeItem('user')
-    localStorage.removeItem('token')
-    sessionStorage.clear()
-    setUser(null)
-    setNotice('You have been logged out successfully.')
+  async function handleLogout() {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          Accept: 'application/json',
+        },
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Logout failed.')
+      }
+
+      setUser(null)
+      setNotice('You have been logged out successfully.')
+    } catch (error) {
+      setNotice(error.message || 'Unable to log out. Please try again.')
+    }
   }
 
   return (
@@ -172,8 +239,14 @@ export default function App() {
           <a className="active-link" href="#services">
             Appointments
           </a>
-          <a href="#login">Login</a>
+          {!user && <a href="#login">Login</a>}
         </nav>
+
+        {checkingSession && (
+          <span role="status" aria-live="polite">
+            Checking session...
+          </span>
+        )}
 
         {!user && (
           <button
@@ -201,6 +274,108 @@ export default function App() {
       </header>
 
       <main id="home">
+        {checkingSession ? (
+          <section
+            style={{ padding: '64px 24px', textAlign: 'center' }}
+            role="status"
+          >
+            Checking your session...
+          </section>
+        ) : user ? (
+          <section
+            className="patient-dashboard"
+            style={{
+              maxWidth: '1100px',
+              margin: '0 auto',
+              padding: '48px 24px 72px',
+            }}
+          >
+            <div className="eyebrow">
+              YOUR PERSONAL HEALTH SPACE
+            </div>
+
+            <h1>Welcome, {user.name || 'Patient'}!</h1>
+
+            <p>
+              You are securely signed in to your StayHealthy account.
+            </p>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns:
+                  'repeat(auto-fit, minmax(240px, 1fr))',
+                gap: '20px',
+                margin: '32px 0',
+              }}
+            >
+              <article className="feature-card">
+                <div className="feature-icon">👤</div>
+                <h3>My Profile</h3>
+                <p>Name: {user.name || 'Patient'}</p>
+                <p>Email: {user.email || 'Not available'}</p>
+                <p>Account: Patient</p>
+              </article>
+
+              <article className="feature-card">
+                <div className="feature-icon">📅</div>
+                <h3>My Appointments</h3>
+                <p>
+                  Appointment history is not yet connected to
+                  your account.
+                </p>
+              </article>
+
+              <article className="feature-card">
+                <div className="feature-icon">🩺</div>
+                <h3>Find a Doctor</h3>
+                <p>
+                  Search the available sample doctor directory
+                  below.
+                </p>
+                <button
+                  className="feature-link"
+                  type="button"
+                  onClick={() =>
+                    document
+                      .getElementById('dashboard-doctors')
+                      ?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start',
+                      })
+                  }
+                >
+                  Search Doctors →
+                </button>
+              </article>
+            </div>
+
+            <PatientAppointments />
+
+            <PatientReviews key={user.id} user={user} />
+
+            <div id="dashboard-doctors">
+              <FindDoctorSearch
+                onSelectDoctor={(doctor) => {
+                  setNotice(
+                    `Selected ${doctor.name}. Appointment booking is not yet connected.`
+                  )
+                }}
+              />
+            </div>
+
+            <div style={{ marginTop: '32px' }}>
+              <button
+                className="header-button logout-button"
+                type="button"
+                onClick={handleLogout}
+              >
+                Log Out
+              </button>
+            </div>
+          </section>
+        ) : (
+          <>
         <section className="hero">
           <div className="hero-copy">
             <div className="eyebrow">
@@ -372,19 +547,16 @@ export default function App() {
               <p>Enter your details to get started.</p>
             </div>
 
-            <label htmlFor="signup-role">Role</label>
-            <select
-              id="signup-role"
+            <input
+              type="hidden"
               name="role"
-              defaultValue="Patient"
-              required
-            >
-              <option value="Patient">Patient</option>
-              <option value="Doctor">Doctor</option>
-              <option value="Healthcare Professional">
-                Healthcare Professional
-              </option>
-            </select>
+              value="Patient"
+            />
+
+            <p className="form-footnote">
+              New accounts are registered as Patient accounts.
+              Professional accounts require administrator approval.
+            </p>
 
             <label htmlFor="signup-name">Full Name</label>
             <input
@@ -475,13 +647,17 @@ export default function App() {
           </form>
         </section>
 
+          </>
+        )}
+
         <Notification
           message={notice}
           onDismiss={() => setNotice('')}
         />
       </main>
 
-      <section className="login-section" id="login">
+      {!user && !checkingSession && (
+        <section className="login-section" id="login">
         <div className="login-card">
           <div className="form-symbol">✚</div>
           <div className="eyebrow login-eyebrow">WELCOME BACK</div>
@@ -544,7 +720,8 @@ export default function App() {
             </p>
           </form>
         </div>
-      </section>
+        </section>
+      )}
 
       <footer className="footer">
         <a className="brand footer-brand" href="#home">

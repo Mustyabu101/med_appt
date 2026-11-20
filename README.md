@@ -1,52 +1,89 @@
-# Medical Appointment Booking — StayHealthy
+# StayHealthy — Medical Appointment Booking
 
 ## Project Overview
-StayHealthy is a healthcare web application built with React and Vite, designed around medical appointment booking and patient-related activities.
+
+StayHealthy is a React and Vite healthcare demonstration application developed for an IBM Skills Network capstone project.
+
+It supports patient authentication, a patient dashboard, sample doctor search, and database-backed appointment requests.
+
+## Technologies
+
+- React, JavaScript, Vite, HTML and CSS
+- Vercel serverless API functions
+- Neon PostgreSQL
+- JWT authentication
+- HTTP-only session cookies
 
 ## Features
-- Responsive navigation bar
-- User registration and login interfaces
-- Doctor search and appointment-related components
-- Appointment booking form
-- Doctor information cards
-- Patient profile management
-- Patient reviews and ratings
-- Responsive healthcare-focused interface
 
-## Technologies Used
-- React
-- JavaScript
-- Vite
-- HTML
-- CSS
+### Patient Authentication
 
-## Prerequisites
-- Node.js
-- npm
+- Patient registration and login
+- Password hashing and verification
+- JWT-based sessions
+- HTTP-only, Secure, SameSite cookies
+- Session restoration after refresh
+- Logout
 
-## Installation and Setup
-1. Clone the repository:
-   `git clone https://github.com/Mustyabu101/med_appt.git`
-2. Enter the project directory:
-   `cd med_appt`
-3. Install dependencies:
-   `npm install`
-4. Start the development server:
-   `npm run dev`
-5. Open the local URL displayed in the terminal.
+### Patient Dashboard
 
-## Production Build
-Run the following command:
+Authenticated patients can:
 
-`npm run build`
+- View their account information
+- Search a sample doctor directory
+- Submit appointment requests
+- View their saved appointment requests
+- Cancel their appointment requests
 
-The generated production files are saved in the `dist` directory.
+## API Endpoints
 
-## Project Purpose
-This project demonstrates React components, responsive design, forms, and healthcare appointment-related interfaces as part of a front-end development capstone.
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | /api/auth/register | Register a patient |
+| POST | /api/auth/login | Authenticate a patient |
+| GET | /api/auth/session | Verify session |
+| POST | /api/auth/logout | Log out |
+| GET | /api/appointments | List patient requests |
+| POST | /api/appointments | Submit a request |
+| DELETE | /api/appointments?id=ID | Cancel an owned request |
 
-## Note
-Authentication and data storage depend on the available backend configuration. Features requiring a live backend should be tested with the appropriate service.
+## Environment Variables
+
+The application requires:
+
+- NEON_POSTGRES_URL — PostgreSQL connection string
+- JWT_SECRET — Random signing secret of at least 32 characters
+
+Never commit real credentials or secrets to GitHub.
+
+## Local Setup
+
+1. Clone the repository from https://github.com/Mustyabu101/med_appt
+2. Enter the med_appt directory.
+3. Run npm ci.
+4. Run npm run dev.
+
+The standalone Vite development server does not automatically provide Vercel API functions.
+
+## Validation
+
+Run npm run lint and npm run build.
+
+The frontend production build is generated in the dist directory.
+
+## Deployment
+
+The project uses Vercel for hosting and serverless functions, with Neon PostgreSQL for database storage.
+
+Set the required environment variables in Vercel before deploying.
+
+## Limitations
+
+- Doctor listings are demonstration data.
+- Appointment requests are not confirmed medical bookings.
+- The standalone review component uses localStorage and is not currently integrated into the dashboard.
+- This project is an educational demonstration, not a production healthcare service.
 
 ## License
+
 Created for educational purposes.

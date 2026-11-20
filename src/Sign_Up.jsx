@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export default function Sign_Up() {
   const [form, setForm] = useState({
@@ -25,7 +25,7 @@ export default function Sign_Up() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/register', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
